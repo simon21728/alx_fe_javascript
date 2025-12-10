@@ -132,6 +132,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Simulated server endpoint
 const SERVER_URL = "https://jsonplaceholder.typicode.com/posts";
+async function fetchServerQuotes() {
+try {
+syncStatus.textContent = "Syncing...";
+
+
+const response = await fetch(SERVER_URL);
+const data = await response.json();
+
+
+const serverQuotes = data.slice(0, 10).map((p) => ({
+id: p.id,
+text: p.title,
+author: "Server"
+}));
+
+
+resolveConflicts(serverQuotes);
+syncStatus.textContent = "Quotes synced with server!";
+notify("Quotes synced with server!");
+} catch (err) {
+syncStatus.textContent = "Sync error";
+notify("Server sync failed!", true);
+}
+}
 
 // Fetch quotes from server (simulation)
 async function fetchQuotesFromServer() {
