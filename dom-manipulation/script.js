@@ -126,3 +126,82 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("newQuote").addEventListener("click", filterQuotes);
 });
+// =======================================================
+// SERVER SYNC SIMULATION (JSONPlaceholder-based)
+// =======================================================
+
+// Simulated server endpoint
+const SERVER_URL = "https://jsonplaceholder.typicode.com/posts";
+
+// Fetch quotes from server (simulation)
+async function fetchQuotesFromServer() {
+  try {
+    const res = await fetch(SERVER_URL);
+    const data = await res.json();
+
+    // Simulated server format → extract "body" field as quote text
+    const serverQuotes = data.slice(0, 5).map(item => ({
+      text: item.body,
+      category: "Server"
+    }));
+
+    return serverQuotes;
+
+  } catch (err) {
+    console.error("Server fetch failed:", err);
+    return [];
+  }
+}
+
+// Upload local quotes to server (simulation)
+async function uploadQuotesToServer() {
+  try {
+    await fetch(SERVER_URL, {
+      method: "POST",
+      body: JSON.stringify(quotes),
+      headers: { "Content-Type": "application/json" }
+    });
+  } catch (err) {
+    console.error("Upload failed:", err);
+  }
+}
+
+// =======================================================
+// SYNC LOGIC + CONFLICT RESOLUTION
+// =======================================================
+
+async function syncWithServer() {
+  document.getElementById("syncStatus").textContent = "Syncing…";
+
+  const serverQuotes = await fetchQuotesFromServer();
+  const localQuotes = JSON.parse(localStorage.getItem("quotes")) || [];
+
+  // Conflict detection:
+  const conflictDetected =
+    JSON.stringify(serverQuotes) !== JSON.stringify(localQuotes);
+
+  if (conflictDetected) {
+    // SERVER WINS (as required)
+    quotes = serverQuotes;
+    saveQuotes();
+    populateCategories();
+    filterQuotes();
+
+    document.getElementById("conflictAlert").style.display = "block";
+  } else {
+    document.getElementById("conflictAlert").style.display = "none";
+  }
+
+  // Upload local (updated or same) data → simulated
+  await uploadQuotesToServer();
+
+  document.getElementById("syncStatus").textContent =
+    conflictDetected
+      ? "Sync complete with conflicts (server data applied)."
+      : "Sync complete (no conflicts).";
+}
+
+// =======================================================
+// PERIODIC SYNC (every 10 seconds)
+// =======================================================
+setInterval(syncWithServer, 10000);

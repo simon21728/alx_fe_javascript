@@ -20,6 +20,16 @@
   </style>
 </head>
 <body>
+    <!-- Sync Section -->
+     <div class="form-section">
+         <h3>Data Sync</h3>
+         <button onclick="syncWithServer()">Sync Now</button>
+         <div id="syncStatus" style="margin-top:10px; color:#007bff;"></div>
+     </div>
+     <div id="conflictAlert" style="display:none; padding:10px; background:#ffe6e6; color:#b30000; margin-top:15px; border-radius:5px;">
+        Conflict detected! Server data has overridden local changes.
+     </div>
+
     <select id="categoryFilter" onchange="filterQuotes()">
     <option value="all">All Categories</option>
     </select>
